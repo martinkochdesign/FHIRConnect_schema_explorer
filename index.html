@@ -257,7 +257,7 @@ footer{max-width:1500px;margin:10px auto 30px;padding:0 18px;color:var(--muted);
       <h2>Observed schema notes</h2>
       <p class="muted">Points noticed while building this explorer. They are observations about the published schemas, not official errata.</p>
       <ul>
-        <li><code>preprocessor.hierarchy.split.openehr</code> is placed outside <code>split.properties</code>, so JSON Schema validators ignore it.</li>
+        <!--<li><code>preprocessor.hierarchy.split.openehr</code> is placed outside <code>split.properties</code>, so JSON Schema validators ignore it.</li>-->
         <li><code>mappings[].manual</code> and <code>manual[].openehr</code> are typed as <code>array</code> but declare <code>properties</code> instead of <code>items</code>; validators therefore do not check the contents of array entries.</li>
         <li><code>openehrCondition</code> requires either <code>targetAttribute</code> or <code>targetAttributes</code> (<code>oneOf</code>); the corresponding <code>fhirCondition</code> has no such constraint.</li>
         <li><code>unidirectional</code> and <code>operator</code> are free strings in the schema – accepted values are defined only in the specification text.</li>
