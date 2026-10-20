@@ -526,7 +526,8 @@ function treeItem(e, depth){
   if(e.required && e.parent) { const r=document.createElement("span"); r.className="rq"; r.title="required"; row.appendChild(r); }
   const n = document.createElement("span"); n.className="tn"; n.textContent = e.parent ? e.name + (typesOf(e.node).includes("array")?"[]":"") : e.name; row.appendChild(n);
   const t = document.createElement("span"); t.className="tt"; t.textContent = e.flags.recursiveTo ? "↻ recursive" : typeLabel(e); row.appendChild(t);
-  if(e.flags.stray) { const w=document.createElement("span"); w.textContent="⚠"; w.title="Outside 'properties' – ignored by validators"; w.style.color="var(--warn)"; row.appendChild(w); }
+  //if(e.flags.stray) { const w=document.createElement("span"); w.textContent="⚠"; w.title="Outside 'properties' – ignored by validators"; w.style.color="var(--warn)"; row.appendChild(w); }
+  if(e.flags.stray) { const w=document.createElement("span"); w.textContent=""; w.title="Outside 'properties' – ignored by validators"; w.style.color="var(--warn)"; row.appendChild(w); }
   row.onclick = () => go(e.id);
   li.appendChild(row);
   if(kids){
@@ -564,7 +565,7 @@ function renderDetail(e){
   if(n.enum) b.push(`<span class="badge ok">enum</span>`);
   if(n.additionalProperties===false && t.includes("object")) b.push(`<span class="badge">closed object</span>`);
   if(n.oneOf) b.push(`<span class="badge warn">oneOf</span>`);
-  if(e.flags.stray) b.push(`<span class="badge warn">⚠ outside properties</span>`);
+  //if(e.flags.stray) b.push(`<span class="badge warn">⚠ outside properties</span>`);
   if(e.flags.propsOnArray) b.push(`<span class="badge warn">⚠ properties on array</span>`);
   let h = `<div class="crumbs">${crumbs(e)}</div>
     <h2 class="mono" style="font-size:1.3rem">${esc(e.path || META[e.key].root)} <button class="btn" id="copyPath" title="Copy path">⧉ copy</button></h2>
@@ -588,7 +589,8 @@ function renderDetail(e){
   if(cons.length) h += `<h3>Constraints</h3><ul>${cons.map(c=>`<li>${c}</li>`).join("")}</ul>`;
   if(e.children.length){
     h += `<h3>Children (${e.children.length})</h3><table><tr><th>Key</th><th>Type</th><th></th><th>Explanation</th></tr>`;
-    h += e.children.map(c=>`<tr class="click" data-id="${esc(c.id)}"><td><code>${esc(c.name)}</code>${c.flags.stray?" ⚠":""}</td><td class="muted">${esc(c.flags.recursiveTo?"↻ recursive":typeLabel(c))}</td><td>${c.required?'<span class="badge req">req</span>':''}</td><td>${esc(strip(docOf(c).d||""))}</td></tr>`).join("");
+    //h += e.children.map(c=>`<tr class="click" data-id="${esc(c.id)}"><td><code>${esc(c.name)}</code>${c.flags.stray?" ⚠":""}</td><td class="muted">${esc(c.flags.recursiveTo?"↻ recursive":typeLabel(c))}</td><td>${c.required?'<span class="badge req">req</span>':''}</td><td>${esc(strip(docOf(c).d||""))}</td></tr>`).join("");
+    h += e.children.map(c=>`<tr class="click" data-id="${esc(c.id)}"><td><code>${esc(c.name)}</code>${c.flags.stray?"":""}</td><td class="muted">${esc(c.flags.recursiveTo?"↻ recursive":typeLabel(c))}</td><td>${c.required?'<span class="badge req">req</span>':''}</td><td>${esc(strip(docOf(c).d||""))}</td></tr>`).join("");
     h += `</table>`;
   }
   if(doc.ex) h += `<h3>Illustrative YAML</h3><pre>${esc(doc.ex)}</pre>`;
