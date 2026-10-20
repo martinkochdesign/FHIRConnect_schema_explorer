@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FHIRConnect Schema Explorer – Model &amp; Context Mapping</title>
+<style>
+:root{
+  --bg:#0f1420; --panel:#161d2c; --panel2:#1c2537; --border:#2a3550; --text:#e6ebf5; --muted:#9aa6bf;
+  --accent:#5b9dff; --ok:#36c5a3; --warn:#f2b84b; --danger:#ff6b6b; --code:#0b1019; --chip:#22304a;
+  --model:#5b9dff; --context:#b48cff; --hl:rgba(91,157,255,.18); --shadow:0 6px 24px rgba(0,0,0,.35);
+}
+[data-theme="light"]{
+  --bg:#f5f7fb; --panel:#ffffff; --panel2:#eef2f8; --border:#d6dce8; --text:#172033; --muted:#55627c;
+  --accent:#1f6feb; --ok:#0f8a6c; --warn:#a86a12; --danger:#c53030; --code:#f2f4f9; --chip:#e6ecf8;
+  --model:#1f6feb; --context:#7444d8; --hl:rgba(31,111,235,.12); --shadow:0 6px 20px rgba(20,30,60,.08);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+code,pre,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;font-size:.88em}
+code{background:var(--chip);padding:.05em .35em;border-radius:4px}
+a{color:var(--accent)}
+button{font:inherit;color:inherit;cursor:pointer}
+header{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--border);box-shadow:var(--shadow)}
+.hbar{display:flex;align-items:center;gap:14px;padding:10px 18px;flex-wrap:wrap}
+.brand{font-weight:700;font-size:1.05rem;white-space:nowrap}
+.brand small{display:block;font-weight:400;color:var(--muted);font-size:.75rem}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+nav button{background:none;border:1px solid transparent;border-radius:8px;padding:6px 12px;color:var(--muted)}
+nav button:hover{background:var(--panel2);color:var(--text)}
+nav button.active{background:var(--panel2);border-color:var(--border);color:var(--text);font-weight:600}
+nav .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.searchwrap{position:relative;flex:1;min-width:240px;display:flex;gap:6px}
+.searchwrap input{flex:1;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font:inherit}
+.searchwrap select{background:var(--panel2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:0 8px;font:inherit}
+.searchwrap input:focus{outline:2px solid var(--accent);outline-offset:-1px}
+#results{position:absolute;top:calc(100% + 6px);left:0;right:0;max-height:60vh;overflow:auto;background:var(--panel);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow);display:none}
+#results .r{padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer}
+#results .r:last-child{border-bottom:none}
+#results .r.sel,#results .r:hover{background:var(--hl)}
+#results .r .p{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85em}
+#results .r .s{color:var(--muted);font-size:.83em;margin-top:2px}
+#results .empty{padding:12px;color:var(--muted)}
+mark{background:var(--warn);color:#111;border-radius:2px;padding:0 1px}
+.themebtn{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;white-space:nowrap}
+main{max-width:1500px;margin:0 auto;padding:18px}
+.view{display:none}.view.active{display:block}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow)}
+h1{font-size:1.6rem;margin:.2em 0 .4em}
+h2{font-size:1.25rem;margin:.1em 0 .5em}
+h3{font-size:1.02rem;margin:1.2em 0 .5em}
+.muted{color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.kchip{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;border-radius:5px;padding:1px 6px;color:#fff}
+.kchip.model{background:var(--model)}.kchip.context{background:var(--context)}
+.badge{display:inline-block;font-size:.78rem;border:1px solid var(--border);background:var(--chip);border-radius:999px;padding:1px 9px;margin:0 4px 4px 0}
+.badge.req{border-color:var(--danger);color:var(--danger);background:transparent}
+.badge.opt{color:var(--muted);background:transparent}
+.badge.warn{border-color:var(--warn);color:var(--warn);background:transparent}
+.badge.ok{border-color:var(--ok);color:var(--ok);background:transparent}
+.smap{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px}
+.smap .sc{flex:1 1 170px;max-width:260px;background:var(--panel);border:1px solid var(--border);border-left:4px solid var(--c);border-radius:10px;padding:10px 12px;cursor:pointer}
+.smap .sc:hover{background:var(--panel2)}
+.smap .sc b{font-family:ui-monospace,Menlo,Consolas,monospace}
+.smap .sc div{font-size:.82rem;color:var(--muted);margin-top:3px}
+.layout{display:grid;grid-template-columns:minmax(280px,380px) 1fr;gap:16px;align-items:start}
+.side{position:sticky;top:84px;max-height:calc(100vh - 100px);overflow:auto;padding:10px}
+.sidebar-tools{display:flex;gap:6px;margin:0 0 8px;flex-wrap:wrap}
+.sidebar-tools button,.btn{background:var(--panel2);border:1px solid var(--border);border-radius:7px;padding:4px 10px;font-size:.85rem}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+ul.tree,ul.tree ul{list-style:none;margin:0;padding:0}
+ul.tree ul{margin-left:14px;border-left:1px dashed var(--border);padding-left:6px}
+ul.tree li.collapsed>ul{display:none}
+.trow{display:flex;align-items:center;gap:6px;padding:3px 6px;border-radius:6px;cursor:pointer;white-space:nowrap}
+.trow:hover{background:var(--panel2)}
+.trow.sel{background:var(--hl);outline:1px solid var(--accent)}
+.tg{width:18px;height:18px;border:none;background:none;padding:0;color:var(--muted);flex:none;font-size:.8rem}
+.tg.none{visibility:hidden}
+.tn{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.87rem}
+.tt{font-size:.72rem;color:var(--muted);border:1px solid var(--border);border-radius:4px;padding:0 4px}
+.rq{width:7px;height:7px;border-radius:50%;background:var(--danger);flex:none}
+.detail{min-height:420px}
+.crumbs{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85rem;color:var(--muted);margin-bottom:6px;word-break:break-all}
+.crumbs a{cursor:pointer;text-decoration:none}
+.desc{font-size:1rem}
+.note{border-left:3px solid var(--warn);background:var(--panel2);padding:8px 12px;border-radius:0 8px 8px 0;margin:10px 0;font-size:.92rem}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.03em}
+tr.click{cursor:pointer}tr.click:hover{background:var(--panel2)}
+pre{background:var(--code);border:1px solid var(--border);border-radius:8px;padding:10px 12px;overflow:auto;margin:6px 0}
+details summary{cursor:pointer;color:var(--muted);margin:12px 0 4px}
+.flow{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap;margin:10px 0}
+.fbox{flex:1 1 200px;border:2px solid var(--c);border-radius:12px;padding:10px 12px;background:var(--panel)}
+.fbox h4{margin:0 0 4px;color:var(--c)}
+.fbox ul{margin:4px 0 0;padding-left:18px;font-size:.88rem}
+.farrow{align-self:center;font-size:1.6rem;color:var(--muted)}
+.stat{font-size:1.8rem;font-weight:700}
+.kbd{border:1px solid var(--border);border-bottom-width:2px;border-radius:4px;padding:0 5px;font-size:.8rem;font-family:ui-monospace,Menlo,monospace}
+.about p,.about li{max-width:900px}
+.legal{border:1px solid var(--warn);border-radius:12px;padding:14px 18px;background:var(--panel2)}
+footer{max-width:1500px;margin:10px auto 30px;padding:0 18px;color:var(--muted);font-size:.82rem}
+.toast{position:fixed;bottom:18px;right:18px;background:var(--ok);color:#fff;padding:8px 14px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+@media (max-width:900px){.layout,.grid2{grid-template-columns:1fr}.side{position:static;max-height:none}.farrow{transform:rotate(90deg)}}
+</style>
+</head>
+<body>
+<header>
+  <div class="hbar">
+    <div class="brand">FHIRConnect Schema Explorer<small>Model &amp; Context Mapping · v1.0.0</small></div>
+    <nav id="nav">
+      <button data-view="overview" class="active">Overview</button>
+      <button data-view="model"><span class="dot" style="background:var(--model)"></span>Model mapping</button>
+      <button data-view="context"><span class="dot" style="background:var(--context)"></span>Context mapping</button>
+      <button data-view="about">About</button>
+    </nav>
+    <div class="searchwrap">
+      <input id="q" type="search" placeholder="Search elements, paths, descriptions, enum values…  ( / )" autocomplete="off" aria-label="Search schema elements">
+      <select id="scope" aria-label="Search scope"><option value="all">Both</option><option value="model">Model</option><option value="context">Context</option></select>
+      <div id="results" role="listbox"></div>
+    </div>
+    <button class="themebtn" id="theme" title="Toggle light / dark mode">☀️ Light</button>
+  </div>
+</header>
+
+<main>
+  <!-- OVERVIEW -->
+  <section class="view active" id="view-overview">
+    <h1>FHIRConnect schemas at a glance</h1>
+    <p class="muted" style="max-width:900px">FHIRConnect describes mappings between openEHR and HL7® FHIR® in YAML files. Two kinds of files work together: <b>model mappings</b> (one archetype ⇄ one FHIR resource/profile) and <b>context mappings</b> (one openEHR template ⇄ one FHIR profile, orchestrating several model mappings). Use the tabs to browse each schema as a tree, or search across both from the header.</p>
+    <div class="grid2" style="margin:16px 0">
+      <div class="card" style="border-top:4px solid var(--model)">
+        <span class="kchip model">Model</span>
+        <h2 style="margin-top:8px">Model mapping schema</h2>
+        <p class="muted">Files with <code>type: model</code> or <code>type: extension</code>. Defines element-level mapping rules, conditions, nested and referenced mappings.</p>
+        <div class="stat" id="stat-model">–</div><div class="muted">schema elements</div>
+        <p><button class="btn primary" data-goto="model">Explore model mapping →</button></p>
+      </div>
+      <div class="card" style="border-top:4px solid var(--context)">
+        <span class="kchip context">Context</span>
+        <h2 style="margin-top:8px">Context mapping schema</h2>
+        <p class="muted">Files with <code>type: context</code>. Binds a FHIR profile to an openEHR template and lists which model mappings are used and where the transformation starts.</p>
+        <div class="stat" id="stat-context">–</div><div class="muted">schema elements</div>
+        <p><button class="btn primary" data-goto="context">Explore context mapping →</button></p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>How the two file types fit together</h2>
+      <div class="flow">
+        <div class="fbox" style="--c:var(--context)">
+          <h4>Context mapping <span class="muted">(type: context)</span></h4>
+          <ul>
+            <li><code>context.profile.url</code> → FHIR profile</li>
+            <li><code>context.template.id</code> → openEHR template</li>
+            <li><code>context.archetypes[]</code> → model mappings to use</li>
+            <li><code>context.extensions[]</code> → extensions to apply</li>
+            <li><code>context.start</code> → entry archetype</li>
+          </ul>
+        </div>
+        <div class="farrow">→</div>
+        <div class="fbox" style="--c:var(--model)">
+          <h4>Model mapping <span class="muted">(type: model)</span></h4>
+          <ul>
+            <li><code>spec.openEhrConfig.archetype</code> ⇄ <code>spec.fhirConfig.structureDefinition</code></li>
+            <li><code>preprocessor</code> → model-level conditions / hierarchy</li>
+            <li><code>mappings[]</code> → element rules (<code>with.fhir</code> ⇄ <code>with.openehr</code>)</li>
+            <li><code>slotArchetype</code> → delegates slot content to another model</li>
+          </ul>
+        </div>
+        <div class="farrow">←</div>
+        <div class="fbox" style="--c:var(--warn)">
+          <h4>Extension <span class="muted">(type: extension)</span></h4>
+          <ul>
+            <li>Same schema as model mapping</li>
+            <li><code>spec.extends</code> → base model</li>
+            <li><code>mappings[].extension</code>: add / append / overwrite</li>
+            <li><code>mappings[].appendTo</code> → target rule</li>
+          </ul>
+        </div>
+      </div>
+      <p class="muted" style="font-size:.85rem">Diagram is an interpretation for learning purposes – see the official specification for normative behaviour.</p>
+    </div>
+
+    <div class="grid2" style="margin-top:16px">
+      <div class="card">
+        <h3 style="margin-top:0"><span class="kchip model">Model</span> Illustrative skeleton</h3>
+<pre id="ex-model"></pre>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0"><span class="kchip context">Context</span> Illustrative skeleton</h3>
+<pre id="ex-context"></pre>
+      </div>
+    </div>
+    <p class="muted" style="font-size:.85rem">Tips: press <span class="kbd">/</span> to search, <span class="kbd">↑</span><span class="kbd">↓</span> + <span class="kbd">Enter</span> to pick a result, <span class="kbd">Esc</span> to close. Every element has a shareable link (URL hash).</p>
+  </section>
+
+  <!-- MODEL -->
+  <section class="view" id="view-model">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <h1><span class="kchip model">Model</span> Model mapping schema</h1>
+      <div><button class="btn" data-dl="model-enriched">⬇ Schema with descriptions</button> <button class="btn" data-dl="model-original">⬇ Original schema</button></div>
+    </div>
+    <div class="smap" id="smap-model"></div>
+    <div class="layout">
+      <aside class="card side"><div class="sidebar-tools"><button data-exp="model">Expand all</button><button data-col="model">Collapse</button></div><div id="tree-model"></div></aside>
+      <article class="card detail" id="detail-model"></article>
+    </div>
+  </section>
+
+  <!-- CONTEXT -->
+  <section class="view" id="view-context">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <h1><span class="kchip context">Context</span> Context mapping schema</h1>
+      <div><button class="btn" data-dl="context-enriched">⬇ Schema with descriptions</button> <button class="btn" data-dl="context-original">⬇ Original schema</button></div>
+    </div>
+    <div class="smap" id="smap-context"></div>
+    <div class="layout">
+      <aside class="card side"><div class="sidebar-tools"><button data-exp="context">Expand all</button><button data-col="context">Collapse</button></div><div id="tree-context"></div></aside>
+      <article class="card detail" id="detail-context"></article>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="view about" id="view-about">
+    <h1>About this page</h1>
+    <div class="card">
+      <h2>Purpose</h2>
+      <p>This page is an unofficial, interactive learning aid for exploring the structure of the FHIRConnect v1.0.0 <b>model mapping</b> and <b>context mapping</b> JSON Schemas. It visualises the schemas as browsable trees, makes their elements searchable and adds explanatory texts to help readers understand FHIRConnect YAML files.</p>
+
+      <h2>Sources of the original data</h2>
+      <ul>
+        <li>Model mapping schema: <a href="<redacted URL>" target="_blank" rel="noopener">model-mapping.schema.json</a></li>
+        <li>Context mapping schema: <a href="<redacted URL>" target="_blank" rel="noopener">contextual-mapping.schema.json</a></li>
+        <li>FHIRConnect specification (official documentation): <a href="<redacted URL>" target="_blank" rel="noopener">sevkohler.github.io/FHIRconnect-spec</a></li>
+        <li>Specification source repository: <a href="<redacted URL>" target="_blank" rel="noopener">github.com/SevKohler/FHIRconnect-spec</a></li>
+      </ul>
+      <p class="muted">Snapshot: schema content as retrieved in October 2026 (FHIRConnect grammar v1.0.0). The schemas are embedded unchanged; descriptions are added only in this page and in the “with descriptions” downloads.</p>
+
+      <h2>Copyright</h2>
+      <p>© 2026 Martin Andreas Koch – compilation, page design, visualisation and explanatory texts of this explorer.</p>
+      <p>The FHIRConnect specification and the original JSON Schemas are the work of their respective authors (Severin Kohler and contributors to the FHIRconnect-spec project). All rights in the original material remain with them, and its use is subject to the licence terms stated in the original repository. This page is not affiliated with or endorsed by the FHIRConnect authors.</p>
+      <p class="muted">HL7® and FHIR® are registered trademarks of Health Level Seven International. openEHR and all other product or organisation names are trademarks of their respective owners. Their use here is for identification only and does not imply endorsement.</p>
+
+      <div class="legal">
+        <h2 style="margin-top:0">Disclaimer / limitation of liability</h2>
+        <ul>
+          <li>This page is provided “as is”, for informational and educational purposes only, without any warranty of any kind, express or implied, including accuracy, completeness or fitness for a particular purpose.</li>
+          <li>The explanatory descriptions, notes and YAML examples are <b>unofficial interpretations</b>, written with the help of an AI assistant. They may be incomplete or incorrect and are not part of the FHIRConnect specification.</li>
+          <li>The original specification and schemas may change at any time. This page is a static snapshot and may not reflect later versions, corrections or changes.</li>
+          <li>The author accepts no liability for errors, omissions, changes or inconsistencies – whether in the original data, between the original data and this page, or within this page – nor for any damage or loss arising from its use.</li>
+          <li>For any productive, clinical or normative use, always consult the official FHIRConnect specification as the authoritative source.</li>
+        </ul>
+      </div>
+
+      <h2>Observed schema notes</h2>
+      <p class="muted">Points noticed while building this explorer. They are observations about the published schemas, not official errata.</p>
+      <ul>
+        <li><code>preprocessor.hierarchy.split.openehr</code> is placed outside <code>split.properties</code>, so JSON Schema validators ignore it.</li>
+        <li><code>mappings[].manual</code> and <code>manual[].openehr</code> are typed as <code>array</code> but declare <code>properties</code> instead of <code>items</code>; validators therefore do not check the contents of array entries.</li>
+        <li><code>openehrCondition</code> requires either <code>targetAttribute</code> or <code>targetAttributes</code> (<code>oneOf</code>); the corresponding <code>fhirCondition</code> has no such constraint.</li>
+        <li><code>unidirectional</code> and <code>operator</code> are free strings in the schema – accepted values are defined only in the specification text.</li>
+        <li>The context schema does not mark <code>profile.url</code> or <code>template.id</code> as required, although they are the core of the binding.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+<footer>FHIRConnect Schema Explorer · unofficial learning aid · © 2026 Martin Andreas Koch · original schemas © their respective authors · <a href="#about" data-goto="about">About &amp; disclaimer</a></footer>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================== ORIGINAL SCHEMAS (embedded unchanged) ================== */
+const MODEL_SCHEMA = {
+ "$schema":"http://json-schema.org/draft-07/schema","title":"FHIRConnect Model Schema","type":"object",
+ "properties":{
+  "grammar":{"type":"string","pattern":"^FHIRConnect/v[0-9]+\\.[0-9]+\\.[0-9]+$"},
+  "type":{"type":"string","enum":["model","extension"]},
+  "metadata":{"type":"object","properties":{"name":{"type":"string"},"version":{"type":"string"}},"required":["name","version"]},
+  "spec":{"type":"object","properties":{
+    "system":{"type":"string","enum":["FHIR"]},
+    "version":{"type":"string","enum":["R4"]},
+    "extends":{"type":"string"},
+    "unidirectional":{"type":"string"},
+    "openEhrConfig":{"type":"object","properties":{"archetype":{"type":"string"}},"required":["archetype"]},
+    "fhirConfig":{"type":"object","properties":{"structureDefinition":{"type":"string","format":"uri"}},"required":["structureDefinition"]}
+   },"required":["system","version"]},
+  "mappings":{"$ref":"#/$defs/mappings"},
+  "preprocessor":{"type":"object","properties":{
+    "fhirCondition":{"type":["object","null"],"properties":{"targetRoot":{"type":"string"},"targetAttribute":{"type":"string"},"targetAttributes":{"type":"array"},"operator":{"type":"string"},"criteria":{"type":"string"},"criterias":{"type":"array"},"identifying":{"type":"boolean"}},"additionalProperties":false,"required":["targetRoot","operator"]},
+    "openehrCondition":{"type":["object","null"],"properties":{"targetRoot":{"type":"string"},"targetAttributes":{"type":"array"},"targetAttribute":{"type":"string"},"operator":{"type":"string"},"criteria":{"type":"string"},"criterias":{"type":"array"},"identifying":{"type":"boolean"}},"additionalProperties":false,"required":["targetRoot","operator"],"oneOf":[{"required":["targetAttribute"]},{"required":["targetAttributes"]}]},
+    "hierarchy":{"type":["object","null"],"properties":{
+      "with":{"type":"object","properties":{"fhir":{"type":"string"},"openehr":{"type":"string"}}},
+      "split":{"type":"object","properties":{
+          "fhir":{"type":"object","properties":{"create":{"type":"string"},"path":{"type":"string"},"unique":{"type":"array"}}}
+        },
+        "openehr":{"type":"object","properties":{"create":{"type":"string"},"path":{"type":"string"},"unique":{"type":"array"}}}
+      }
+     },"additionalProperties":false}
+   }}
+ },
+ "$defs":{
+  "mappings":{"type":"array","items":{"$ref":"#/$defs/mapping"},"title":"Mappings"},
+  "mapping":{"type":"object","additionalProperties":false,"properties":{
+    "name":{"type":"string"},
+    "type":{"type":"string","enum":["NONE","QUANTITY","DATETIME","CODEABLECONCEPT","CODING","STRING","DOSAGE","ID","IDENTIFIER","PROPORTION"]},
+    "extension":{"type":"string","enum":["add","append","overwrite"]},
+    "appendTo":{"type":"string"},
+    "with":{"type":"object","additionalProperties":false,"properties":{"fhir":{"type":"string"},"openehr":{"type":"string"},"type":{"type":"string"},"value":{"type":"string"}}},
+    "unidirectional":{"type":"string"},
+    "manual":{"type":"array","additionalProperties":false,"properties":{"name":{"type":"string"},"openehr":{"type":"array","properties":{"path":{"type":"string"},"value":{"type":"string"}}},"fhirCondition":{"type":"object"},"value":{"type":"string"},"unidirectional":{"type":"string"}}},
+    "fhirCondition":{"type":["object","null"],"properties":{"targetRoot":{"type":"string"},"targetAttribute":{"type":"string"},"targetAttributes":{"type":"array"},"operator":{"type":"string"},"criteria":{"type":"string"},"criterias":{"type":"array"},"identifying":{"type":"boolean"}},"additionalProperties":false,"required":["targetRoot","operator"]},
+    "openehrCondition":{"type":["object","null"],"properties":{"targetRoot":{"type":"string"},"targetAttributes":{"type":"array"},"targetAttribute":{"type":"string"},"operator":{"type":"string"},"criteria":{"type":"string"},"criterias":{"type":"array"},"identifying":{"type":"boolean"}},"additionalProperties":false,"required":["targetRoot","operator"],"oneOf":[{"required":["targetAttribute"]},{"required":["targetAttributes"]}]},
+    "followedBy":{"type":["object","null"],"properties":{"mappings":{"type":"array","items":{"$ref":"#/$defs/mapping"},"additionalProperties":false,"title":"Following Mappings"}},"additionalProperties":false,"required":["mappings"]},
+    "reference":{"type":["object","null"],"properties":{"resourceType":{"type":"string"},"mappings":{"type":"array","items":{"$ref":"#/$defs/mapping"},"additionalProperties":false,"title":"Reference Mappings"}},"additionalProperties":false,"required":["resourceType","mappings"]},
+    "slotArchetype":{"type":["string","null"]}
+   },"required":["name"],"title":"Model Mapping"}
+ },
+ "required":["grammar","type","metadata","spec"]
+};
+
+const CONTEXT_SCHEMA = {
+ "$schema":"http://json-schema.org/draft-07/schema","title":"FHIRConnect Context Schema","type":"object",
+ "properties":{
+  "grammar":{"type":"string","pattern":"^FHIRConnect/v[0-9]+\\.[0-9]+\\.[0-9]+$"},
+  "type":{"type":"string","enum":["context"]},
+  "metadata":{"type":"object","properties":{"name":{"type":"string"},"version":{"type":"string"}},"required":["name","version"]},
+  "spec":{"type":"object","properties":{"system":{"type":"string","enum":["FHIR"]},"version":{"type":"string","enum":["R4"]}},"required":["system","version"]},
+  "context":{"type":"object","properties":{
+    "profile":{"type":"object","properties":{"url":{"type":"string"},"version":{"type":"string"}}},
+    "template":{"type":"object","properties":{"id":{"type":"string"},"sem_ver":{"type":"string"}}},
+    "archetypes":{"type":"array","items":{"type":"string"}},
+    "extensions":{"type":"array","items":{"type":"string"}},
+    "operational":{"type":"array","items":{"type":"string"}},
+    "start":{"type":"string"}
+   },"required":["profile","template","archetypes","start"]}
+ },
+ "required":["grammar","type","metadata","spec","context"]
+};
+
+const SCHEMAS = {model:MODEL_SCHEMA, context:CONTEXT_SCHEMA};
+const META = {
+  model:{label:'Model',root:'Model mapping file',file:'model-mapping.schema.json',url:'<redacted URL>'},
+  context:{label:'Context',root:'Context mapping file',file:'contextual-mapping.schema.json',url:'<redacted URL>'}
+};
+
+/* ================== UNOFFICIAL EXPLANATIONS ================== */
+const GRAMMAR = {d:"FHIRConnect grammar version this file is written against, e.g. <code>FHIRConnect/v1.0.0</code>. Must match the pattern <code>FHIRConnect/vX.Y.Z</code>.", ex:"grammar: FHIRConnect/v1.0.0"};
+const DESC = {
+ model:{
+  "":{d:"FHIRConnect model mapping: describes how one openEHR archetype maps to and from a FHIR resource or profile. A file is either a complete <code>model</code> or an <code>extension</code> of another model."},
+  "grammar":GRAMMAR,
+  "type":{d:"Kind of mapping file. <code>model</code> is the base mapping for an archetype; <code>extension</code> builds on an existing model (see <code>spec.extends</code>) and adds, appends or overwrites rules.",ex:"type: model"},
+  "metadata":{d:"Identification of this mapping file.",ex:"metadata:\n  name: blood_pressure\n  version: 0.0.1"},
+  "metadata.name":{d:"Name of the model mapping, typically derived from the mapped archetype."},
+  "metadata.version":{d:"Version of this mapping file (e.g. <code>0.0.1</code>)."},
+  "spec":{d:"Technical binding: target standard and release, plus the openEHR archetype and the FHIR StructureDefinition this model connects.",ex:"spec:\n  system: FHIR\n  version: R4\n  openEhrConfig:\n    archetype: openEHR-EHR-OBSERVATION.blood_pressure.v2\n  fhirConfig:\n    structureDefinition: <redacted URL>"},
+  "spec.system":{d:"Target standard. Only <code>FHIR</code> is allowed in v1.0.0."},
+  "spec.version":{d:"FHIR release. Only <code>R4</code> is allowed in v1.0.0."},
+  "spec.extends":{d:"Used with <code>type: extension</code>: name of the base model mapping that this file extends."},
+  "spec.unidirectional":{d:"Restricts the whole model to one direction (by default mappings work in both directions). Typical values look like <code>fhir->openehr</code> or <code>openehr->fhir</code>; the schema allows any string, so check the specification for accepted values."},
+  "spec.openEhrConfig":{d:"openEHR side of the model."},
+  "spec.openEhrConfig.archetype":{d:"Archetype ID mapped by this model, e.g. <code>openEHR-EHR-OBSERVATION.blood_pressure.v2</code>."},
+  "spec.fhirConfig":{d:"FHIR side of the model."},
+  "spec.fhirConfig.structureDefinition":{d:"Canonical URL (URI) of the FHIR StructureDefinition – a base resource or a profile – e.g. <code><redacted URL></code>."},
+  "mappings":{d:"Ordered list of element mapping rules (<em>Model Mapping</em>). Each rule connects one FHIR path with one openEHR path, optionally with conditions, nested rules or references.",ex:"mappings:\n  - name: systolic\n    with:\n      fhir: \"$resource.component.value\"\n      openehr: \"$archetype/data[at0001]/events[at0006]/data[at0003]/items[at0004]\"\n    type: QUANTITY"},
+  "mappings[]":{d:"Model Mapping: a single mapping rule between a FHIR path and an openEHR path."},
+  "mappings[].name":{d:"Name of the rule (e.g. <code>systolic</code>). Should be unique within the file; extensions refer to rules by name (<code>appendTo</code>, overwrite). The only required key of a rule."},
+  "mappings[].type":{d:"Data type conversion applied between the FHIR element and the openEHR element. If omitted, the engine may infer the conversion from the paths."},
+  "mappings[].extension":{d:"Only in extension files: how this rule modifies the base model – <code>add</code> a new rule, <code>append</code> to an existing rule (see <code>appendTo</code>) or <code>overwrite</code> a rule with the same name."},
+  "mappings[].appendTo":{d:"Used with <code>extension: append</code>: name of the base rule this rule is appended to."},
+  "mappings[].with":{d:"The mapping pair: which FHIR path is connected to which openEHR path. Closed object – only <code>fhir</code>, <code>openehr</code>, <code>type</code> and <code>value</code> are allowed.",ex:"with:\n  fhir: \"$resource.effective\"\n  openehr: \"$archetype/data[at0001]/events[at0006]/time\""},
+  "mappings[].with.fhir":{d:"FHIRPath-like path on the FHIR side, usually relative to the resource (<code>$resource</code>) or to the parent rule, e.g. <code>$resource.effective</code>."},
+  "mappings[].with.openehr":{d:"Path on the openEHR side, usually relative to the archetype (<code>$archetype</code>) or to the parent rule, e.g. <code>$archetype/data[at0001]/events[at0006]/time</code>."},
+  "mappings[].with.type":{d:"Optional explicit type hint for the target element, e.g. for FHIR choice elements such as <code>value[x]</code>."},
+  "mappings[].with.value":{d:"Optional fixed value used instead of a value read from the source."},
+  "mappings[].unidirectional":{d:"Restricts this rule to one direction only (e.g. <code>fhir->openehr</code>)."},
+  "mappings[].manual":{d:"Manual (hard-coded) mappings: write fixed values to openEHR paths or FHIR elements where no 1:1 source element exists, optionally guarded by a condition.",ex:"manual:\n  - name: status\n    openehr:\n      - path: \"...\"\n        value: \"...\"\n    fhirCondition:\n      targetRoot: \"$resource\"\n      targetAttribute: \"status\"\n      operator: \"one of\"\n      criteria: \"[final]\""},
+  "mappings[].manual[].name":{d:"Name of the manual entry."},
+  "mappings[].manual[].openehr":{d:"List of openEHR paths with fixed values to set."},
+  "mappings[].manual[].openehr[].path":{d:"openEHR path to fill."},
+  "mappings[].manual[].openehr[].value":{d:"Fixed value written to that openEHR path."},
+  "mappings[].manual[].fhirCondition":{d:"Condition on the FHIR side under which this manual entry applies."},
+  "mappings[].manual[].value":{d:"Fixed value (e.g. for the FHIR side)."},
+  "mappings[].manual[].unidirectional":{d:"Direction restriction for this manual entry."},
+  "mappings[].fhirCondition":{d:"Condition evaluated on FHIR data – the rule only applies if it holds (e.g. only the component with a specific LOINC code).",ex:"fhirCondition:\n  targetRoot: \"$resource.component\"\n  targetAttribute: \"code.coding.code\"\n  operator: \"one of\"\n  criteria: \"[8480-6]\""},
+  "mappings[].openehrCondition":{d:"Condition evaluated on openEHR data – the rule only applies if it holds. Requires exactly one of <code>targetAttribute</code> or <code>targetAttributes</code> (oneOf)."},
+  "mappings[].followedBy":{d:"Nested rules evaluated in the scope of the element matched by this rule – child paths become relative to the parent.",ex:"followedBy:\n  mappings:\n    - name: code\n      with:\n        fhir: \"code\"\n        openehr: \"items[at0001]\""},
+  "mappings[].followedBy.mappings":{d:"Child mapping rules – same structure as <em>Model Mapping</em> (recursive)."},
+  "mappings[].reference":{d:"Maps into a separate, referenced FHIR resource (e.g. <code>Observation.performer</code> → <code>Practitioner</code>).",ex:"reference:\n  resourceType: Practitioner\n  mappings:\n    - name: performerName\n      with:\n        fhir: \"name.text\"\n        openehr: \"...\""},
+  "mappings[].reference.resourceType":{d:"FHIR resource type of the referenced resource, e.g. <code>Patient</code>, <code>Practitioner</code>, <code>Encounter</code>."},
+  "mappings[].reference.mappings":{d:"Mapping rules applied inside the referenced resource (recursive)."},
+  "mappings[].slotArchetype":{d:"For openEHR archetype slots: the archetype (and thus model mapping) used for the slot content, e.g. a CLUSTER archetype."},
+  "preprocessor":{d:"Model-level rules evaluated before the element rules: which resources / data the model applies to and how hierarchy differences are handled.",ex:"preprocessor:\n  fhirCondition:\n    targetRoot: \"$resource\"\n    targetAttribute: \"code.coding.code\"\n    operator: \"one of\"\n    criteria: \"[85354-9]\"\n    identifying: true"},
+  "preprocessor.fhirCondition":{d:"Model-level condition on FHIR data, e.g. only Observations with a certain code. With <code>identifying: true</code> it helps recognise which model applies to an incoming resource."},
+  "preprocessor.openehrCondition":{d:"Model-level condition on openEHR data. Requires exactly one of <code>targetAttribute</code> or <code>targetAttributes</code> (oneOf)."},
+  "preprocessor.hierarchy":{d:"Handles structural differences (hierarchy levels, cardinalities) between the FHIR and openEHR sides."},
+  "preprocessor.hierarchy.with":{d:"Paths defining corresponding hierarchy levels on both sides."},
+  "preprocessor.hierarchy.with.fhir":{d:"Hierarchy path on the FHIR side."},
+  "preprocessor.hierarchy.with.openehr":{d:"Hierarchy path on the openEHR side."},
+  "preprocessor.hierarchy.split":{d:"Splits one structure into several on the target side (e.g. one openEHR entry into several FHIR resources, or vice versa)."},
+  "preprocessor.hierarchy.split.fhir":{d:"How elements are split / created on the FHIR side."},
+  "preprocessor.hierarchy.split.openehr":{d:"How elements are split / created on the openEHR side."}
+ },
+ context:{
+  "":{d:"FHIRConnect contextual mapping. Binds a FHIR profile to an openEHR template and declares which model mappings (archetypes) take part in the transformation and where it starts."},
+  "grammar":GRAMMAR,
+  "type":{d:"Document kind. For contextual mappings this is always <code>context</code>.",ex:"type: context"},
+  "metadata":{d:"Identification of this context mapping file.",ex:"metadata:\n  name: vital_signs_context\n  version: 0.0.1"},
+  "metadata.name":{d:"Name of the context mapping."},
+  "metadata.version":{d:"Version of this context mapping file (e.g. <code>1.0.0</code>)."},
+  "spec":{d:"Target standard on the non-openEHR side.",ex:"spec:\n  system: FHIR\n  version: R4"},
+  "spec.system":{d:"Target standard. Only <code>FHIR</code> is allowed in v1.0.0."},
+  "spec.version":{d:"FHIR release. Only <code>R4</code> is allowed in v1.0.0."},
+  "context":{d:"Core of the file: links the FHIR profile and the openEHR template and lists the model mappings that are used.",ex:"context:\n  profile:\n    url: <redacted URL>    version: 4.0.1\n  template:\n    id: vital_signs\n    sem_ver: 1.0.0\n  archetypes:\n    - openEHR-EHR-OBSERVATION.blood_pressure.v2\n  start: openEHR-EHR-COMPOSITION.encounter.v1"},
+  "context.profile":{d:"The FHIR profile (StructureDefinition) on the FHIR side of the context."},
+  "context.profile.url":{d:"Canonical URL of the FHIR profile, e.g. <code><redacted URL></code>."},
+  "context.profile.version":{d:"Version of the FHIR profile."},
+  "context.template":{d:"The openEHR template on the openEHR side of the context."},
+  "context.template.id":{d:"Template ID of the openEHR (operational) template."},
+  "context.template.sem_ver":{d:"Semantic version of the openEHR template."},
+  "context.archetypes":{d:"Archetype IDs whose model mappings are used in this context. Each should have a corresponding model mapping file (<code>type: model</code>)."},
+  "context.extensions":{d:"Extension mappings (<code>type: extension</code>) that add to or override the base model mappings within this context."},
+  "context.operational":{d:"Operational mappings, e.g. for template-level or administrative data not covered by archetype model mappings. Check the official specification for the exact semantics."},
+  "context.start":{d:"Entry point of the transformation: the root archetype (typically the COMPOSITION archetype) from which mapping starts, e.g. <code>openEHR-EHR-COMPOSITION.encounter.v1</code>."}
+ }
+};
+const FALLBACK = {
+  targetRoot:{d:"Root from which the condition is evaluated, e.g. <code>$resource</code>, <code>$archetype</code> or a sub-path."},
+  targetAttribute:{d:"Attribute (path relative to <code>targetRoot</code>) whose value is checked, e.g. <code>code.coding.code</code>."},
+  targetAttributes:{d:"Several attributes to check – alternative to <code>targetAttribute</code>."},
+  operator:{d:"Comparison operator, e.g. <code>one of</code>, <code>not of</code>, <code>empty</code>, <code>not empty</code>. Free string in the schema – see the specification for accepted values."},
+  criteria:{d:"Value(s) compared by the operator, e.g. <code>[8480-6]</code>."},
+  criterias:{d:"List of criteria – alternative to <code>criteria</code>."},
+  identifying:{d:"If <code>true</code>, the condition identifies the resource / structure (used to select the right model) rather than only filtering data."},
+  create:{d:"Element to be created for each split part."},
+  path:{d:"Path along which the structure is split."},
+  unique:{d:"Attributes used to keep created elements unique / to group them."}
+};
+const ENUMDOC = {
+  "model:type":{model:"Base mapping for one archetype ⇄ FHIR resource/profile.",extension:"Extends a base model (see spec.extends) by adding, appending or overwriting rules."},
+  "context:type":{context:"Contextual mapping file (template ⇄ profile)."},
+  "model:spec.system":{FHIR:"HL7 FHIR"},"context:spec.system":{FHIR:"HL7 FHIR"},
+  "model:spec.version":{R4:"FHIR Release 4"},"context:spec.version":{R4:"FHIR Release 4"},
+  "model:mappings[].type":{
+    NONE:"No type-specific conversion; values/structures are passed on as they are.",
+    QUANTITY:"DV_QUANTITY (and similar numeric types) ⇄ Quantity – magnitude and units (UCUM).",
+    DATETIME:"DV_DATE_TIME / DV_DATE / DV_TIME ⇄ dateTime, date, instant, time.",
+    CODEABLECONCEPT:"DV_CODED_TEXT / DV_TEXT ⇄ CodeableConcept (codings + text).",
+    CODING:"DV_CODED_TEXT ⇄ a single Coding (system, code, display).",
+    STRING:"DV_TEXT and other text values ⇄ string.",
+    DOSAGE:"Medication dosage structures ⇄ FHIR Dosage.",
+    ID:"Identifier-like values ⇄ FHIR id / plain identifier strings.",
+    IDENTIFIER:"DV_IDENTIFIER ⇄ Identifier (system, value).",
+    PROPORTION:"DV_PROPORTION ⇄ Ratio / Quantity (e.g. percentages)."
+  },
+  "model:mappings[].extension":{add:"Add a new rule to the base model.",append:"Append to an existing base rule named in appendTo.",overwrite:"Replace the base rule with the same name."}
+};
+const SKELETON = {
+ model:"grammar: FHIRConnect/v1.0.0\ntype: model\nmetadata:\n  name: blood_pressure\n  version: 0.0.1\nspec:\n  system: FHIR\n  version: R4\n  openEhrConfig:\n    archetype: openEHR-EHR-OBSERVATION.blood_pressure.v2\n  fhirConfig:\n    structureDefinition: <redacted URL>  fhirCondition:\n    targetRoot: \"$resource\"\n    targetAttribute: \"code.coding.code\"\n    operator: \"one of\"\n    criteria: \"[85354-9]\"\nmappings:\n  - name: systolic\n    with:\n      fhir: \"$resource.component.value\"\n      openehr: \"$archetype/data[at0001]/events[at0006]/data[at0003]/items[at0004]\"\n    type: QUANTITY\n    fhirCondition:\n      targetRoot: \"$resource.component\"\n      targetAttribute: \"code.coding.code\"\n      operator: \"one of\"\n      criteria: \"[8480-6]\"",
+ context:"grammar: FHIRConnect/v1.0.0\ntype: context\nmetadata:\n  name: vital_signs_context\n  version: 0.0.1\nspec:\n  system: FHIR\n  version: R4\ncontext:\n  profile:\n    url: <redacted URL>    version: 4.0.1\n  template:\n    id: vital_signs\n    sem_ver: 1.0.0\n  archetypes:\n    - openEHR-EHR-OBSERVATION.blood_pressure.v2\n  extensions: []\n  start: openEHR-EHR-COMPOSITION.encounter.v1"
+};
+
+/* ================== TREE BUILDING ================== */
+const KEYWORDS = new Set(["$schema","$defs","$ref","$comment","title","description","type","properties","required","items","enum","pattern","format","additionalProperties","oneOf","anyOf","allOf"]);
+const INDEX = {}; const ROOTS = {};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const strip = s => String(s||"").replace(/<[^>]+>/g,"").replace(/&gt;/g,">").replace(/&lt;/g,"<");
+const typesOf = n => !n ? [] : n.type ? (Array.isArray(n.type)?n.type:[n.type]) : (n.$ref?["$ref"]:[]);
+const resolveRef = (schema, ref) => ref.replace(/^#\//,"").split("/").reduce((o,p)=>o&&o[p], schema);
+const join = (base,k) => base ? base+"."+k : k;
+function docOf(e){ return DESC[e.key][e.path] || FALLBACK[e.name] || {}; }
+
+function buildTree(key){
+  const schema = SCHEMAS[key]; const expanded = {};
+  function walk(raw, path, name, required, parent, flags){
+    let node = raw; const f = Object.assign({}, flags||{});
+    if(raw.$ref){ f.ref = raw.$ref; node = resolveRef(schema, raw.$ref); }
+    const id = key+":"+path;
+    const e = {id, key, path, name, raw, node, required, parent, children:[], flags:f};
+    INDEX[id] = e; if(parent) parent.children.push(e);
+    const isArr = typesOf(node).includes("array");
+    if(node.items){
+      const it = node.items;
+      if(it.$ref){
+        f.itemsRef = it.$ref;
+        if(expanded[it.$ref]){ f.recursiveTo = expanded[it.$ref]; }
+        else { expanded[it.$ref] = id; const res = resolveRef(schema, it.$ref); e.itemNode = res; addProps(res, path+"[]", e); }
+      } else { e.itemNode = it; if(it.properties) addProps(it, path+"[]", e); }
+    }
+    if(node.properties){ if(isArr) f.propsOnArray = true; addProps(node, isArr ? path+"[]" : path, e); }
+    const base = isArr ? path+"[]" : path;
+    for(const k of Object.keys(node)){
+      const v = node[k];
+      if(!KEYWORDS.has(k) && v && typeof v==="object" && !Array.isArray(v) && v.type) walk(v, join(base,k), k, false, e, {stray:true});
+    }
+    return e;
+  }
+  function addProps(node, base, e){
+    const req = node.required || [];
+    for(const [k,v] of Object.entries(node.properties)) walk(v, join(base,k), k, req.includes(k), e, {});
+  }
+  ROOTS[key] = walk(schema, "", META[key].root, true, null, {});
+}
+buildTree("model"); buildTree("context");
+const ALL = Object.values(INDEX);
+
+/* ================== RENDERING ================== */
+function typeLabel(e){
+  const t = typesOf(e.node).filter(x=>x!=="$ref");
+  let s = t.join(" | ") || "any";
+  if(t.includes("array")){
+    const it = e.itemNode || (e.node.items||null);
+    if(e.flags.itemsRef) s = s.replace("array", "array<"+(resolveRef(SCHEMAS[e.key], e.flags.itemsRef).title||"object")+">");
+    else if(it && it.type) s = s.replace("array","array<"+it.type+">");
+  }
+  return s;
+}
+function treeItem(e, depth){
+  const li = document.createElement("li");
+  const row = document.createElement("div"); row.className = "trow"; row.dataset.id = e.id;
+  const kids = e.children.length > 0;
+  const tg = document.createElement("button"); tg.className = "tg"+(kids?"":" none"); tg.textContent = depth>=2 ? "▸" : "▾"; tg.setAttribute("aria-label","toggle");
+  tg.onclick = ev => { ev.stopPropagation(); li.classList.toggle("collapsed"); tg.textContent = li.classList.contains("collapsed") ? "▸" : "▾"; };
+  row.appendChild(tg);
+  if(e.required && e.parent) { const r=document.createElement("span"); r.className="rq"; r.title="required"; row.appendChild(r); }
+  const n = document.createElement("span"); n.className="tn"; n.textContent = e.parent ? e.name + (typesOf(e.node).includes("array")?"[]":"") : e.name; row.appendChild(n);
+  const t = document.createElement("span"); t.className="tt"; t.textContent = e.flags.recursiveTo ? "↻ recursive" : typeLabel(e); row.appendChild(t);
+  if(e.flags.stray) { const w=document.createElement("span"); w.textContent="⚠"; w.title="Outside 'properties' – ignored by validators"; w.style.color="var(--warn)"; row.appendChild(w); }
+  row.onclick = () => go(e.id);
+  li.appendChild(row);
+  if(kids){
+    const ul = document.createElement("ul");
+    e.children.forEach(c => ul.appendChild(treeItem(c, depth+1)));
+    li.appendChild(ul);
+    if(depth>=2) li.classList.add("collapsed");
+  }
+  return li;
+}
+function renderTree(key){
+  const box = document.getElementById("tree-"+key); box.innerHTML = "";
+  const ul = document.createElement("ul"); ul.className = "tree"; ul.appendChild(treeItem(ROOTS[key], 0)); box.appendChild(ul);
+}
+function renderStructureMap(key){
+  const box = document.getElementById("smap-"+key); box.innerHTML = "";
+  const color = key==="model" ? "var(--model)" : "var(--context)";
+  ROOTS[key].children.forEach(c => {
+    const d = document.createElement("div"); d.className="sc"; d.style.setProperty("--c", c.required ? color : "var(--border)");
+    d.innerHTML = `<b>${esc(c.name)}</b> ${c.required?'<span class="badge req">required</span>':'<span class="badge opt">optional</span>'}<div>${esc(strip(docOf(c).d||"")).slice(0,110)}${strip(docOf(c).d||"").length>110?"…":""}</div>`;
+    d.onclick = () => go(c.id); box.appendChild(d);
+  });
+}
+function crumbs(e){
+  const chain = []; let x = e; while(x){ chain.unshift(x); x = x.parent; }
+  return chain.map((c,i)=> i===chain.length-1 ? `<b>${esc(c.parent?c.name:META[c.key].label)}</b>` : `<a data-id="${esc(c.id)}">${esc(c.parent?c.name:META[c.key].label)}</a>`).join(" › ");
+}
+function renderDetail(e){
+  const n = e.node, doc = docOf(e), t = typesOf(n);
+  const b = [];
+  b.push(`<span class="kchip ${e.key}">${META[e.key].label}</span> `);
+  b.push(`<span class="badge">${esc(e.flags.recursiveTo ? "array<Model Mapping> (recursive)" : typeLabel(e))}</span>`);
+  if(e.parent) b.push(e.required ? `<span class="badge req">required</span>` : `<span class="badge opt">optional</span>`);
+  if(t.includes("null")) b.push(`<span class="badge">nullable</span>`);
+  if(n.enum) b.push(`<span class="badge ok">enum</span>`);
+  if(n.additionalProperties===false && t.includes("object")) b.push(`<span class="badge">closed object</span>`);
+  if(n.oneOf) b.push(`<span class="badge warn">oneOf</span>`);
+  if(e.flags.stray) b.push(`<span class="badge warn">⚠ outside properties</span>`);
+  if(e.flags.propsOnArray) b.push(`<span class="badge warn">⚠ properties on array</span>`);
+  let h = `<div class="crumbs">${crumbs(e)}</div>
+    <h2 class="mono" style="font-size:1.3rem">${esc(e.path || META[e.key].root)} <button class="btn" id="copyPath" title="Copy path">⧉ copy</button></h2>
+    <div>${b.join("")}</div>
+    <p class="desc">${doc.d || '<em class="muted">No explanation available yet.</em>'}</p>`;
+  if(e.flags.stray) h += `<div class="note">In the published schema this key sits outside <code>properties</code>, so standard JSON Schema validators ignore it. It is shown here because it is clearly intended as a property.</div>`;
+  if(e.flags.propsOnArray) h += `<div class="note">This element is typed <code>array</code> but declares <code>properties</code> instead of <code>items</code>. The entries below describe the intended shape of each array item; validators will not enforce it.</div>`;
+  if(e.flags.recursiveTo){ const tgt = INDEX[e.flags.recursiveTo]; h += `<div class="note">Each item has the same structure as a top-level mapping rule (<em>Model Mapping</em>). <a data-id="${esc(tgt.id)}" style="cursor:pointer">Go to Model Mapping definition →</a></div>`; }
+  if(n.enum){
+    const ed = ENUMDOC[e.key+":"+e.path] || {};
+    h += `<h3>Allowed values</h3><table><tr><th>Value</th><th>Meaning (unofficial)</th></tr>${n.enum.map(v=>`<tr><td><code>${esc(v)}</code></td><td>${esc(ed[v]||"")}</td></tr>`).join("")}</table>`;
+  }
+  const cons = [];
+  if(n.pattern) cons.push(`Pattern: <code>${esc(n.pattern)}</code>`);
+  if(n.format) cons.push(`Format: <code>${esc(n.format)}</code>`);
+  if(n.required && n.required.length) cons.push(`Required keys: ${n.required.map(r=>`<code>${esc(r)}</code>`).join(", ")}`);
+  if(n.oneOf) cons.push(`Exactly one of: ${n.oneOf.map(o=>(o.required||[]).map(r=>`<code>${esc(r)}</code>`).join(" + ")).join(" <b>or</b> ")}`);
+  if(n.additionalProperties===false && t.includes("object")) cons.push("No keys other than the listed ones are allowed.");
+  if(e.itemNode && e.itemNode.required && e.flags.itemsRef) cons.push(`Each item requires: ${e.itemNode.required.map(r=>`<code>${esc(r)}</code>`).join(", ")}`);
+  if(e.flags.ref) cons.push(`Defined via <code>${esc(e.flags.ref)}</code>`);
+  if(cons.length) h += `<h3>Constraints</h3><ul>${cons.map(c=>`<li>${c}</li>`).join("")}</ul>`;
+  if(e.children.length){
+    h += `<h3>Children (${e.children.length})</h3><table><tr><th>Key</th><th>Type</th><th></th><th>Explanation</th></tr>`;
+    h += e.children.map(c=>`<tr class="click" data-id="${esc(c.id)}"><td><code>${esc(c.name)}</code>${c.flags.stray?" ⚠":""}</td><td class="muted">${esc(c.flags.recursiveTo?"↻ recursive":typeLabel(c))}</td><td>${c.required?'<span class="badge req">req</span>':''}</td><td>${esc(strip(docOf(c).d||""))}</td></tr>`).join("");
+    h += `</table>`;
+  }
+  if(doc.ex) h += `<h3>Illustrative YAML</h3><pre>${esc(doc.ex)}</pre>`;
+  h += `<details><summary>Original schema fragment</summary><pre>${esc(JSON.stringify(e.raw,null,2))}</pre></details>`;
+  const box = document.getElementById("detail-"+e.key); box.innerHTML = h;
+  box.querySelectorAll("[data-id]").forEach(a => a.onclick = () => go(a.dataset.id));
+  const cp = document.getElementById("copyPath");
+  if(cp) cp.onclick = () => { try{ navigator.clipboard.writeText(e.path); toast("Path copied"); }catch(_){ toast("Copy not available"); } };
+}
+
+/* ================== NAVIGATION ================== */
+function showView(v){
+  document.querySelectorAll(".view").forEach(s => s.classList.toggle("active", s.id==="view-"+v));
+  document.querySelectorAll("#nav button").forEach(b => b.classList.toggle("active", b.dataset.view===v));
+}
+function go(id, noHash){
+  const e = INDEX[id]; if(!e) return;
+  showView(e.key);
+  // expand ancestors
+  const box = document.getElementById("tree-"+e.key);
+  box.querySelectorAll(".trow.sel").forEach(r => r.classList.remove("sel"));
+  const row = box.querySelector(`.trow[data-id="${CSS.escape(id)}"]`);
+  if(row){
+    let li = row.parentElement.parentElement.closest("li");
+    while(li){ li.classList.remove("collapsed"); const tg = li.querySelector(":scope>.trow>.tg"); if(tg) tg.textContent="▾"; li = li.parentElement.closest("li"); }
+    row.classList.add("sel"); row.scrollIntoView({block:"nearest"});
+  }
+  renderDetail(e);
+  if(!noHash) history.replaceState(null, "", "#"+encodeURIComponent(id));
+}
+function fromHash(){
+  const h = decodeURIComponent(location.hash.slice(1));
+  if(!h) return;
+  if(["overview","about","model","context"].includes(h)){ if(h==="model"||h==="context") go(ROOTS[h].id, true); else showView(h); return; }
+  if(INDEX[h]) go(h, true);
+}
+document.querySelectorAll("#nav button").forEach(b => b.onclick = () => {
+  const v = b.dataset.view;
+  if(v==="model"||v==="context"){ const sel = document.querySelector(`#tree-${v} .trow.sel`); go(sel ? sel.dataset.id : ROOTS[v].id); }
+  else { showView(v); history.replaceState(null,"","#"+v); }
+  window.scrollTo(0,0);
+});
+document.querySelectorAll("[data-goto]").forEach(b => b.addEventListener("click", ev => {
+  ev.preventDefault(); const v = b.dataset.goto;
+  if(v==="model"||v==="context") go(ROOTS[v].id); else { showView(v); history.replaceState(null,"","#"+v); }
+  window.scrollTo(0,0);
+}));
+document.querySelectorAll("[data-exp]").forEach(b => b.onclick = () => document.querySelectorAll(`#tree-${b.dataset.exp} li`).forEach(li => { li.classList.remove("collapsed"); const tg=li.querySelector(":scope>.trow>.tg"); if(tg) tg.textContent="▾"; }));
+document.querySelectorAll("[data-col]").forEach(b => b.onclick = () => document.querySelectorAll(`#tree-${b.dataset.col} li`).forEach(li => { if(li.querySelector(":scope>ul") && li.parentElement.closest("li")){ li.classList.add("collapsed"); const tg=li.querySelector(":scope>.trow>.tg"); if(tg) tg.textContent="▸"; } }));
+
+/* ================== SEARCH ================== */
+const q = document.getElementById("q"), results = document.getElementById("results"), scopeSel = document.getElementById("scope");
+let hits = [], cur = -1;
+const hay = e => (e.name+" "+e.path+" "+strip(docOf(e).d)+" "+(e.node.enum||[]).join(" ")+" "+Object.values(ENUMDOC[e.key+":"+e.path]||{}).join(" ")).toLowerCase();
+function hl(text, term){ const s = esc(text); if(!term) return s; const i = s.toLowerCase().indexOf(esc(term).toLowerCase()); return i<0 ? s : s.slice(0,i)+"<mark>"+s.slice(i,i+esc(term).length)+"</mark>"+s.slice(i+esc(term).length); }
+function snippet(text, term){ const t = strip(text); const i = t.toLowerCase().indexOf(term); if(i<0) return t.slice(0,120)+(t.length>120?"…":""); const s = Math.max(0,i-40); return (s?"…":"")+t.slice(s, s+140)+(s+140<t.length?"…":""); }
+function doSearch(){
+  const term = q.value.trim().toLowerCase(); const scope = scopeSel.value;
+  if(!term){ results.style.display="none"; hits=[]; return; }
+  hits = ALL.filter(e => e.parent && (scope==="all"||e.key===scope) && hay(e).includes(term)).map(e => {
+    const nm = e.name.toLowerCase(); let score = nm===term?0 : nm.startsWith(term)?1 : e.path.toLowerCase().includes(term)?2 : 3; return {e,score};
+  }).sort((a,b)=>a.score-b.score || a.e.path.length-b.e.path.length).slice(0,40).map(x=>x.e);
+  cur = hits.length ? 0 : -1;
+  results.innerHTML = hits.length ? hits.map((e,i)=>`<div class="r${i===cur?" sel":""}" data-i="${i}"><span class="kchip ${e.key}">${META[e.key].label}</span> <span class="p">${hl(e.path,term)}</span><div class="s">${hl(snippet(docOf(e).d||"", term),term)}</div></div>`).join("") : `<div class="empty">No matching elements.</div>`;
+  results.style.display = "block";
+  results.querySelectorAll(".r").forEach(r => r.onclick = () => pick(+r.dataset.i));
+}
+function pick(i){ const e = hits[i]; if(!e) return; results.style.display="none"; go(e.id); window.scrollTo(0,0); }
+function moveSel(d){ if(!hits.length) return; cur = (cur+d+hits.length)%hits.length; results.querySelectorAll(".r").forEach((r,i)=>r.classList.toggle("sel", i===cur)); const s = results.querySelector(".r.sel"); if(s) s.scrollIntoView({block:"nearest"}); }
+q.addEventListener("input", doSearch); scopeSel.addEventListener("change", doSearch);
+q.addEventListener("keydown", ev => {
+  if(ev.key==="ArrowDown"){ ev.preventDefault(); moveSel(1); }
+  else if(ev.key==="ArrowUp"){ ev.preventDefault(); moveSel(-1); }
+  else if(ev.key==="Enter"){ ev.preventDefault(); pick(cur); }
+  else if(ev.key==="Escape"){ results.style.display="none"; q.blur(); }
+});
+q.addEventListener("focus", () => { if(q.value.trim()) doSearch(); });
+document.addEventListener("click", ev => { if(!ev.target.closest(".searchwrap")) results.style.display="none"; });
+document.addEventListener("keydown", ev => { if(ev.key==="/" && document.activeElement!==q && !/input|textarea|select/i.test(document.activeElement.tagName)){ ev.preventDefault(); q.focus(); } });
+
+/* ================== THEME ================== */
+const themeBtn = document.getElementById("theme");
+function setTheme(t){ document.documentElement.dataset.theme = t; themeBtn.textContent = t==="dark" ? "☀️ Light" : "🌙 Dark"; try{ localStorage.setItem("fhirconnect-explorer-theme", t); }catch(_){} }
+(function(){ let t=null; try{ t = localStorage.getItem("fhirconnect-explorer-theme"); }catch(_){}
+  if(!t) t = (window.matchMedia && matchMedia("(prefers-color-scheme: light)").matches) ? "light" : "dark"; setTheme(t); })();
+themeBtn.onclick = () => setTheme(document.documentElement.dataset.theme==="dark" ? "light" : "dark");
+
+/* ================== DOWNLOADS ================== */
+function enrich(key){
+  const s = JSON.parse(JSON.stringify(SCHEMAS[key]));
+  const D = (p,name) => { const x = DESC[key][p] || FALLBACK[name]; return x && x.d ? strip(x.d) : null; };
+  function w(node, path, name){
+    if(!node || typeof node!=="object") return;
+    const text = D(path, name); if(text && !node.$ref) node.description = text;
+    const isArr = typesOf(node).includes("array"); const base = isArr ? path+"[]" : path;
+    if(node.properties) for(const [k,v] of Object.entries(node.properties)) w(v, join(base,k), k);
+    if(node.items && !node.items.$ref && node.items.properties) for(const [k,v] of Object.entries(node.items.properties)) w(v, join(path+"[]",k), k);
+    for(const k of Object.keys(node)){ const v=node[k]; if(!KEYWORDS.has(k) && v && typeof v==="object" && !Array.isArray(v) && v.type) w(v, join(base,k), k); }
+  }
+  w(s, "", "");
+  if(s.$defs){ if(s.$defs.mappings) s.$defs.mappings.description = strip(DESC.model["mappings"].d); if(s.$defs.mapping) w(s.$defs.mapping, "mappings[]", ""); }
+  const out = {"$schema":s.$schema, "title":s.title, "$comment":"Unofficial descriptions added for documentation purposes only. Original schema: "+META[key].url+" - the official FHIRConnect specification is authoritative."};
+  for(const k of Object.keys(s)) if(!(k in out)) out[k] = s[k];
+  return out;
+}
+function download(name, obj){
+  const blob = new Blob([JSON.stringify(obj,null,2)], {type:"application/json"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 800);
+}
+document.querySelectorAll("[data-dl]").forEach(b => b.onclick = () => {
+  const [key, kind] = b.dataset.dl.split("-");
+  if(kind==="enriched") download(META[key].file.replace(".json",".with-descriptions.json"), enrich(key));
+  else download(META[key].file, SCHEMAS[key]);
+});
+
+/* ================== INIT ================== */
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1400); }
+["model","context"].forEach(k => { renderTree(k); renderStructureMap(k); renderDetail(ROOTS[k]); document.getElementById("stat-"+k).textContent = ALL.filter(e=>e.key===k && e.parent).length; });
+const tr = document.querySelector("#tree-model .trow"); if(tr) tr.classList.add("sel");
+const tc = document.querySelector("#tree-context .trow"); if(tc) tc.classList.add("sel");
+document.getElementById("ex-model").textContent = SKELETON.model;
+document.getElementById("ex-context").textContent = SKELETON.context;
+fromHash();
+window.addEventListener("hashchange", fromHash);
+</script>
+</body>
+</html>
