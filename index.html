@@ -308,7 +308,12 @@ const MODEL_SCHEMA = {
     "appendTo":{"type":"string"},
     "with":{"type":"object","additionalProperties":false,"properties":{"fhir":{"type":"string"},"openehr":{"type":"string"},"type":{"type":"string"},"value":{"type":"string"}}},
     "unidirectional":{"type":"string"},
-    "manual":{"type":"array","additionalProperties":false,"properties":{"name":{"type":"string"},"openehr":{"type":"array","properties":{"path":{"type":"string"},"value":{"type":"string"}}},"fhirCondition":{"type":"object"},"value":{"type":"string"},"unidirectional":{"type":"string"}}},
+    "manual":{"type":"array","additionalProperties":false,"properties":{"name":{"type":"string"},
+    
+    "openehr":{"type":"array","properties":{"path":{"type":"string"},"value":{"type":"string"}}},
+    "fhir":{"type":"array","properties":{"path":{"type":"string"},"value":{"type":"string"}}},
+
+    "fhirCondition":{"type":"object"},"value":{"type":"string"},"unidirectional":{"type":"string"}}},
     "fhirCondition":{"type":["object","null"],"properties":{"targetRoot":{"type":"string"},"targetAttribute":{"type":"string"},"targetAttributes":{"type":"array"},"operator":{"type":"string"},"criteria":{"type":"string"},"criterias":{"type":"array"},"identifying":{"type":"boolean"}},"additionalProperties":false,"required":["targetRoot","operator"]},
     "openehrCondition":{"type":["object","null"],"properties":{"targetRoot":{"type":"string"},"targetAttributes":{"type":"array"},"targetAttribute":{"type":"string"},"operator":{"type":"string"},"criteria":{"type":"string"},"criterias":{"type":"array"},"identifying":{"type":"boolean"}},"additionalProperties":false,"required":["targetRoot","operator"],"oneOf":[{"required":["targetAttribute"]},{"required":["targetAttributes"]}]},
     "followedBy":{"type":["object","null"],"properties":{"mappings":{"type":"array","items":{"$ref":"#/$defs/mapping"},"additionalProperties":false,"title":"Following Mappings"}},"additionalProperties":false,"required":["mappings"]},
@@ -380,6 +385,9 @@ const DESC = {
   "mappings[].manual[].openehr":{d:"List of openEHR paths with fixed values to set."},
   "mappings[].manual[].openehr[].path":{d:"openEHR path to fill."},
   "mappings[].manual[].openehr[].value":{d:"Fixed value written to that openEHR path."},
+  "mappings[].manual[].fhir":{d:"List of FHIR paths with fixed values to set."},
+  "mappings[].manual[].fhir[].path":{d:"FHIR path to fill."},
+  "mappings[].manual[].fhir[].value":{d:"Fixed value written to that FHIR path."},
   "mappings[].manual[].fhirCondition":{d:"Condition on the FHIR side under which this manual entry applies."},
   "mappings[].manual[].value":{d:"Fixed value (e.g. for the FHIR side)."},
   "mappings[].manual[].unidirectional":{d:"Direction restriction for this manual entry."},
