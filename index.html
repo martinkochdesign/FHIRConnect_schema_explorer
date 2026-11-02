@@ -282,10 +282,10 @@ const MODEL_SCHEMA = {
     "version":{"type":"string","enum":["R4"]},
     "extends":{"type":"string"},
     "unidirectional":{"type":"string"},
-    "openEhrConfig":{"type":"object","properties":{"archetype":{"type":"string"}},"required":["archetype"]},
+    "openEhrConfig":{"type":"object","properties":{"archetype":{"type":"string"}, "revision":{"type":"string"}},"required":["archetype"]},
     "fhirConfig":{"type":"object","properties":{"structureDefinition":{"type":"string","format":"uri"}},"required":["structureDefinition"]}
    },"required":["system","version"]},
-  "mappings":{"$ref":"#/$defs/mappings"},
+  
   "preprocessor":{"type":"object","properties":{
     "fhirCondition":{"type":["object","null"],"properties":{"targetRoot":{"type":"string"},"targetAttribute":{"type":"string"},"targetAttributes":{"type":"array"},"operator":{"type":"string"},"criteria":{"type":"string"},"criterias":{"type":"array"},"identifying":{"type":"boolean"}},"additionalProperties":false,"required":["targetRoot","operator"]},
     "openehrCondition":{"type":["object","null"],"properties":{"targetRoot":{"type":"string"},"targetAttributes":{"type":"array"},"targetAttribute":{"type":"string"},"operator":{"type":"string"},"criteria":{"type":"string"},"criterias":{"type":"array"},"identifying":{"type":"boolean"}},"additionalProperties":false,"required":["targetRoot","operator"],"oneOf":[{"required":["targetAttribute"]},{"required":["targetAttributes"]}]},
@@ -297,8 +297,11 @@ const MODEL_SCHEMA = {
         "openehr":{"type":"object","properties":{"create":{"type":"string"},"path":{"type":"string"},"unique":{"type":"array"}}}
       }
      },"additionalProperties":false}
-   }}
+   }},
+   "mappings":{"$ref":"#/$defs/mappings"},
  },
+
+
  "$defs":{
   "mappings":{"type":"array","items":{"$ref":"#/$defs/mapping"},"title":"Mappings"},
   "mapping":{"type":"object","additionalProperties":false,"properties":{
@@ -306,19 +309,30 @@ const MODEL_SCHEMA = {
     "type":{"type":"string","enum":["NONE","QUANTITY","DATETIME","CODEABLECONCEPT","CODING","STRING","DOSAGE","ID","IDENTIFIER","PROPORTION"]},
     "extension":{"type":"string","enum":["add","append","overwrite"]},
     "appendTo":{"type":"string"},
-    "with":{"type":"object","additionalProperties":false,"properties":{"fhir":{"type":"string"},"openehr":{"type":"string"},"type":{"type":"string"},"value":{"type":"string"}}},
+    "with":{"type":"object","additionalProperties":false,"properties":{"fhir":{"type":"string"},"openehr":{"type":"string"},"type":{"type":"string","enum":["NONE","QUANTITY","DATETIME","CODEABLECONCEPT","CODING","STRING","DOSAGE","ID","IDENTIFIER","PROPORTION"]},"value":{"type":"string"}}},
     "unidirectional":{"type":"string"},
     "manual":{"type":"array","additionalProperties":false,"properties":{"name":{"type":"string"},
     
     "openehr":{"type":"array","properties":{"path":{"type":"string"},"value":{"type":"string"}}},
     "fhir":{"type":"array","properties":{"path":{"type":"string"},"value":{"type":"string"}}},
 
-    "fhirCondition":{"type":"object"},"value":{"type":"string"},"unidirectional":{"type":"string"}}},
     "fhirCondition":{"type":["object","null"],"properties":{"targetRoot":{"type":"string"},"targetAttribute":{"type":"string"},"targetAttributes":{"type":"array"},"operator":{"type":"string"},"criteria":{"type":"string"},"criterias":{"type":"array"},"identifying":{"type":"boolean"}},"additionalProperties":false,"required":["targetRoot","operator"]},
+    "openehrCondition":{"type":["object","null"],"properties":{"targetRoot":{"type":"string"},"targetAttribute":{"type":"string"},"targetAttributes":{"type":"array"},"operator":{"type":"string"},"criteria":{"type":"string"},"criterias":{"type":"array"},"identifying":{"type":"boolean"}},"additionalProperties":false,"required":["targetRoot","operator"]},
+    "value":{"type":"string"},
+    "unidirectional":{"type":"string"}}},
+
+    "fhirCondition":{"type":["object","null"],"properties":{"targetRoot":{"type":"string"},"targetAttribute":{"type":"string"},"targetAttributes":{"type":"array"},"operator":{"type":"string"},"criteria":{"type":"string"},"criterias":{"type":"array"},"identifying":{"type":"boolean"}},"additionalProperties":false,"required":["targetRoot","operator"]},
+
     "openehrCondition":{"type":["object","null"],"properties":{"targetRoot":{"type":"string"},"targetAttributes":{"type":"array"},"targetAttribute":{"type":"string"},"operator":{"type":"string"},"criteria":{"type":"string"},"criterias":{"type":"array"},"identifying":{"type":"boolean"}},"additionalProperties":false,"required":["targetRoot","operator"],"oneOf":[{"required":["targetAttribute"]},{"required":["targetAttributes"]}]},
+
     "followedBy":{"type":["object","null"],"properties":{"mappings":{"type":"array","items":{"$ref":"#/$defs/mapping"},"additionalProperties":false,"title":"Following Mappings"}},"additionalProperties":false,"required":["mappings"]},
+    
     "reference":{"type":["object","null"],"properties":{"resourceType":{"type":"string"},"mappings":{"type":"array","items":{"$ref":"#/$defs/mapping"},"additionalProperties":false,"title":"Reference Mappings"}},"additionalProperties":false,"required":["resourceType","mappings"]},
-    "slotArchetype":{"type":["string","null"]}
+    
+    "slotArchetype":{"type":["string","null"]},
+    
+    "link":{"type":["object","null"], "properties":{"meaning":{"type":"string"},"type":{"type":"string"}}},
+
    },"required":["name"],"title":"Model Mapping"}
  },
  "required":["grammar","type","metadata","spec"]
@@ -359,13 +373,14 @@ const DESC = {
   "metadata":{d:"Identification of this mapping file.",ex:"metadata:\n  name: blood_pressure\n  version: 0.0.1"},
   "metadata.name":{d:"Name of the model mapping, typically derived from the mapped archetype."},
   "metadata.version":{d:"Version of this mapping file (e.g. <code>0.0.1</code>)."},
-  "spec":{d:"Technical binding: target standard and release, plus the openEHR archetype and the FHIR StructureDefinition this model connects.",ex:"spec:\n  system: FHIR\n  version: R4\n  openEhrConfig:\n    archetype: openEHR-EHR-OBSERVATION.blood_pressure.v2\n  fhirConfig:\n    structureDefinition: <redacted URL>"},
+  "spec":{d:"Technical binding: target standard and release, plus the openEHR archetype and the FHIR StructureDefinition this model connects.",ex:"spec:\n  system: FHIR\n  version: R4\n  openEhrConfig:\n    archetype: openEHR-EHR-OBSERVATION.blood_pressure.v2\n revision: 2.0.0\n  fhirConfig:\n    structureDefinition: <redacted URL>"},
   "spec.system":{d:"Target standard. Only <code>FHIR</code> is allowed in v1.0.0."},
   "spec.version":{d:"FHIR release. Only <code>R4</code> is allowed in v1.0.0."},
   "spec.extends":{d:"Used with <code>type: extension</code>: name of the base model mapping that this file extends."},
   "spec.unidirectional":{d:"Restricts the whole model to one direction (by default mappings work in both directions). Typical values look like <code>fhir->openehr</code> or <code>openehr->fhir</code>; the schema allows any string, so check the specification for accepted values."},
   "spec.openEhrConfig":{d:"openEHR side of the model."},
   "spec.openEhrConfig.archetype":{d:"Archetype ID mapped by this model, e.g. <code>openEHR-EHR-OBSERVATION.blood_pressure.v2</code>."},
+  "spec.openEhrConfig.revision":{d:"States what revision of the archetype this mapping applies for."},
   "spec.fhirConfig":{d:"FHIR side of the model."},
   "spec.fhirConfig.structureDefinition":{d:"Canonical URL (URI) of the FHIR StructureDefinition – a base resource or a profile – e.g. <code><redacted URL></code>."},
   "mappings":{d:"Ordered list of element mapping rules (<em>Model Mapping</em>). Each rule connects one FHIR path with one openEHR path, optionally with conditions, nested rules or references.",ex:"mappings:\n  - name: systolic\n    with:\n      fhir: \"$resource.component.value\"\n      openehr: \"$archetype/data[at0001]/events[at0006]/data[at0003]/items[at0004]\"\n    type: QUANTITY"},
@@ -379,7 +394,7 @@ const DESC = {
   "mappings[].with.openehr":{d:"Path on the openEHR side, usually relative to the archetype (<code>$archetype</code>) or to the parent rule, e.g. <code>$archetype/data[at0001]/events[at0006]/time</code>."},
   "mappings[].with.type":{d:"Optional explicit type hint for the target element, e.g. for FHIR choice elements such as <code>value[x]</code>."},
   "mappings[].with.value":{d:"Optional fixed value used instead of a value read from the source."},
-  "mappings[].unidirectional":{d:"Restricts this rule to one direction only (e.g. <code>fhir->openehr</code>)."},
+  "mappings[].unidirectional":{d:"Restricts this rule to one direction only (e.g. <code>fhir->openehr</code> or <code>fhir->openehr</code>)."},
   "mappings[].manual":{d:"Manual (hard-coded) mappings: write fixed values to openEHR paths or FHIR elements where no 1:1 source element exists, optionally guarded by a condition.",ex:"manual:\n  - name: status\n    openehr:\n      - path: \"...\"\n        value: \"...\"\n    fhirCondition:\n      targetRoot: \"$resource\"\n      targetAttribute: \"status\"\n      operator: \"one of\"\n      criteria: \"[final]\""},
   "mappings[].manual[].name":{d:"Name of the manual entry."},
   "mappings[].manual[].openehr":{d:"List of openEHR paths with fixed values to set."},
@@ -389,6 +404,7 @@ const DESC = {
   "mappings[].manual[].fhir[].path":{d:"FHIR path to fill."},
   "mappings[].manual[].fhir[].value":{d:"Fixed value written to that FHIR path."},
   "mappings[].manual[].fhirCondition":{d:"Condition on the FHIR side under which this manual entry applies."},
+  "mappings[].manual[].openehrCondition":{d:"Condition on the openEHR side under which this manual entry applies."},
   "mappings[].manual[].value":{d:"Fixed value (e.g. for the FHIR side)."},
   "mappings[].manual[].unidirectional":{d:"Direction restriction for this manual entry."},
   "mappings[].fhirCondition":{d:"Condition evaluated on FHIR data – the rule only applies if it holds (e.g. only the component with a specific LOINC code).",ex:"fhirCondition:\n  targetRoot: \"$resource.component\"\n  targetAttribute: \"code.coding.code\"\n  operator: \"one of\"\n  criteria: \"[8480-6]\""},
@@ -399,6 +415,9 @@ const DESC = {
   "mappings[].reference.resourceType":{d:"FHIR resource type of the referenced resource, e.g. <code>Patient</code>, <code>Practitioner</code>, <code>Encounter</code>."},
   "mappings[].reference.mappings":{d:"Mapping rules applied inside the referenced resource (recursive)."},
   "mappings[].slotArchetype":{d:"For openEHR archetype slots: the archetype (and thus model mapping) used for the slot content, e.g. a CLUSTER archetype."},
+  
+  "mappings[].link":{d:"There are cases where it is needed to map data into another composition. To redirect a part of the FHIR data to a different FHIRconnect mapping. Hereby, the engine checks the <code>meta.url</code> contained in the FHIR resource and searches all available FHIRconnect context mappings. If a context mapping for this <code>meta.url</code> is found, it is executed and saved as a separate composition. This composition is linked using the openEHR <a href='https://specifications.openehr.org/releases/RM/latest/common.html#_link_class'>links</a>. The fields of this link are set in the <code>link</code>."},
+  
   "preprocessor":{d:"Model-level rules evaluated before the element rules: which resources / data the model applies to and how hierarchy differences are handled.",ex:"preprocessor:\n  fhirCondition:\n    targetRoot: \"$resource\"\n    targetAttribute: \"code.coding.code\"\n    operator: \"one of\"\n    criteria: \"[85354-9]\"\n    identifying: true"},
   "preprocessor.fhirCondition":{d:"Model-level condition on FHIR data, e.g. only Observations with a certain code. With <code>identifying: true</code> it helps recognise which model applies to an incoming resource."},
   "preprocessor.openehrCondition":{d:"Model-level condition on openEHR data. Requires exactly one of <code>targetAttribute</code> or <code>targetAttributes</code> (oneOf)."},
@@ -451,6 +470,18 @@ const ENUMDOC = {
   "model:spec.system":{FHIR:"HL7 FHIR"},"context:spec.system":{FHIR:"HL7 FHIR"},
   "model:spec.version":{R4:"FHIR Release 4"},"context:spec.version":{R4:"FHIR Release 4"},
   "model:mappings[].type":{
+    NONE:"No type-specific conversion; values/structures are passed on as they are.",
+    QUANTITY:"DV_QUANTITY (and similar numeric types) ⇄ Quantity – magnitude and units (UCUM).",
+    DATETIME:"DV_DATE_TIME / DV_DATE / DV_TIME ⇄ dateTime, date, instant, time.",
+    CODEABLECONCEPT:"DV_CODED_TEXT / DV_TEXT ⇄ CodeableConcept (codings + text).",
+    CODING:"DV_CODED_TEXT ⇄ a single Coding (system, code, display).",
+    STRING:"DV_TEXT and other text values ⇄ string.",
+    DOSAGE:"Medication dosage structures ⇄ FHIR Dosage.",
+    ID:"Identifier-like values ⇄ FHIR id / plain identifier strings.",
+    IDENTIFIER:"DV_IDENTIFIER ⇄ Identifier (system, value).",
+    PROPORTION:"DV_PROPORTION ⇄ Ratio / Quantity (e.g. percentages)."
+  },
+  "model:mappings[].with.type":{
     NONE:"No type-specific conversion; values/structures are passed on as they are.",
     QUANTITY:"DV_QUANTITY (and similar numeric types) ⇄ Quantity – magnitude and units (UCUM).",
     DATETIME:"DV_DATE_TIME / DV_DATE / DV_TIME ⇄ dateTime, date, instant, time.",
