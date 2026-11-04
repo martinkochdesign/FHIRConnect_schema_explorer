@@ -808,13 +808,13 @@
 
         <h2>Sources of the original data</h2>
         <ul>
-          <li>Model mapping schema: <a href="<redacted URL>" target="_blank"
+          <li>Model mapping schema: <a href="https://github.com/SevKohler/FHIRconnect-spec/blob/main/build/site/FHIRconnect/v1.0.0/_attachments/model-mapping.schema.json" target="_blank"
               rel="noopener">model-mapping.schema.json</a></li>
-          <li>Context mapping schema: <a href="<redacted URL>" target="_blank"
+          <li>Context mapping schema: <a href="https://github.com/SevKohler/FHIRconnect-spec/blob/main/build/site/FHIRconnect/v1.0.0/_attachments/contextual-mapping.schema.json" target="_blank"
               rel="noopener">contextual-mapping.schema.json</a></li>
-          <li>FHIRConnect specification (official documentation): <a href="<redacted URL>" target="_blank"
+          <li>FHIRConnect specification (official documentation): <a href="https://sevkohler.github.io/FHIRconnect-spec" target="_blank"
               rel="noopener">sevkohler.github.io/FHIRconnect-spec</a></li>
-          <li>Specification source repository: <a href="<redacted URL>" target="_blank"
+          <li>Specification source repository: <a href="https://github.com/SevKohler/FHIRconnect-spec" target="_blank"
               rel="noopener">github.com/SevKohler/FHIRconnect-spec</a></li>
         </ul>
         <p class="muted">Snapshot: schema content as retrieved in October 2026 (FHIRConnect grammar v1.0.0). The schemas
@@ -979,8 +979,8 @@
 
     const SCHEMAS = { model: MODEL_SCHEMA, context: CONTEXT_SCHEMA };
     const META = {
-      model: { label: 'Model', root: 'Model mapping file', file: 'model-mapping.schema.json', url: '<redacted URL>' },
-      context: { label: 'Context', root: 'Context mapping file', file: 'contextual-mapping.schema.json', url: '<redacted URL>' }
+      model: { label: 'Model', root: 'Model mapping file', file: 'model-mapping.schema.json', url: 'https://github.com/SevKohler/FHIRconnect-spec/blob/main/build/site/FHIRconnect/v1.0.0/_attachments/model-mapping.schema.json' },
+      context: { label: 'Context', root: 'Context mapping file', file: 'contextual-mapping.schema.json', url: 'https://github.com/SevKohler/FHIRconnect-spec/blob/main/build/site/FHIRconnect/v1.0.0/_attachments/contextual-mapping.schema.json' }
     };
 
     /* ================== UNOFFICIAL EXPLANATIONS ================== */
@@ -993,7 +993,7 @@
         "metadata": { d: "Identification of this mapping file.", ex: "metadata:\n  name: blood_pressure\n  version: 0.0.1" },
         "metadata.name": { d: "Name of the model mapping, typically derived from the mapped archetype." },
         "metadata.version": { d: "Version of this mapping file (e.g. <code>0.0.1</code>)." },
-        "spec": { d: "Technical binding: target standard and release, plus the openEHR archetype and the FHIR StructureDefinition this model connects.", ex: "spec:\n  system: FHIR\n  version: R4\n  openEhrConfig:\n    archetype: openEHR-EHR-OBSERVATION.blood_pressure.v2\n revision: 2.0.0\n  fhirConfig:\n    structureDefinition: <redacted URL>" },
+        "spec": { d: "Technical binding: target standard and release, plus the openEHR archetype and the FHIR StructureDefinition this model connects.", ex: "spec:\n  system: FHIR\n  version: R4\n  openEhrConfig:\n    archetype: openEHR-EHR-OBSERVATION.blood_pressure.v2\n    revision: 2.0.0\n  fhirConfig:\n    structureDefinition: http://hl7.org/fhir/StructureDefinition/bp" },
         "spec.system": { d: "Target standard. Only <code>FHIR</code> is allowed in v1.0.0." },
         "spec.version": { d: "FHIR release. Only <code>R4</code> is allowed in v1.0.0." },
         "spec.extends": { d: "Used with <code>type: extension</code>: name of the base model mapping that this file extends." },
@@ -1002,7 +1002,7 @@
         "spec.openEhrConfig.archetype": { d: "Archetype ID mapped by this model, e.g. <code>openEHR-EHR-OBSERVATION.blood_pressure.v2</code>." },
         "spec.openEhrConfig.revision": { d: "States what revision of the archetype this mapping applies for." },
         "spec.fhirConfig": { d: "FHIR side of the model." },
-        "spec.fhirConfig.structureDefinition": { d: "Canonical URL (URI) of the FHIR StructureDefinition – a base resource or a profile – e.g. <code><redacted URL></code>." },
+        "spec.fhirConfig.structureDefinition": { d: "Canonical URL (URI) of the FHIR StructureDefinition – a base resource or a profile – e.g. <code>http://hl7.org/fhir/StructureDefinition/Observation</code>." },
         "mappings": { d: "Ordered list of element mapping rules (<em>Model Mapping</em>). Each rule connects one FHIR path with one openEHR path, optionally with conditions, nested rules or references.", ex: "mappings:\n  - name: systolic\n    with:\n      fhir: \"$resource.component.value\"\n      openehr: \"$archetype/data[at0001]/events[at0006]/data[at0003]/items[at0004]\"\n    type: QUANTITY" },
         "mappings[]": { d: "Model Mapping: a single mapping rule between a FHIR path and an openEHR path." },
         "mappings[].name": { d: "Name of the rule (e.g. <code>systolic</code>). Should be unique within the file; extensions refer to rules by name (<code>appendTo</code>, overwrite). The only required key of a rule." },
@@ -1064,9 +1064,9 @@
         "spec": { d: "Target standard on the non-openEHR side.", ex: "spec:\n  system: FHIR\n  version: R4" },
         "spec.system": { d: "Target standard. Only <code>FHIR</code> is allowed in v1.0.0." },
         "spec.version": { d: "FHIR release. Only <code>R4</code> is allowed in v1.0.0." },
-        "context": { d: "Core of the file: links the FHIR profile and the openEHR template and lists the model mappings that are used.", ex: "context:\n  profile:\n    url: <redacted URL>    version: 4.0.1\n  template:\n    id: vital_signs\n    sem_ver: 1.0.0\n  archetypes:\n    - openEHR-EHR-OBSERVATION.blood_pressure.v2\n  start: openEHR-EHR-COMPOSITION.encounter.v1" },
+        "context": { d: "Core of the file: links the FHIR profile and the openEHR template and lists the model mappings that are used.", ex: "context:\n  profile:\n    url: http://hl7.org/fhir/uv/ips/StructureDefinition/Composition-uv-ips\n    version: 4.0.1\n  template:\n    id: vital_signs\n    sem_ver: 1.0.0\n  archetypes:\n    - openEHR-EHR-OBSERVATION.blood_pressure.v2\n  start: openEHR-EHR-COMPOSITION.encounter.v1" },
         "context.profile": { d: "The FHIR profile (StructureDefinition) on the FHIR side of the context." },
-        "context.profile.url": { d: "Canonical URL of the FHIR profile, e.g. <code><redacted URL></code>." },
+        "context.profile.url": { d: "Canonical URL of the FHIR profile, e.g. <code>http://hl7.org/fhir/uv/ips/StructureDefinition/Composition-uv-ips</code>." },
         "context.profile.version": { d: "Version of the FHIR profile." },
         "context.template": { d: "The openEHR template on the openEHR side of the context." },
         "context.template.id": { d: "Template ID of the openEHR (operational) template." },
@@ -1170,8 +1170,8 @@
       "model:mappings[].extension": { add: "Add a new rule to the base model.", append: "Append to an existing base rule named in appendTo.", overwrite: "Replace the base rule with the same name." }
     };
     const SKELETON = {
-      model: "grammar: FHIRConnect/v1.0.0\ntype: model\nmetadata:\n  name: blood_pressure\n  version: 0.0.1\nspec:\n  system: FHIR\n  version: R4\n  openEhrConfig:\n    archetype: openEHR-EHR-OBSERVATION.blood_pressure.v2\n  fhirConfig:\n    structureDefinition: <redacted URL>  fhirCondition:\n    targetRoot: \"$resource\"\n    targetAttribute: \"code.coding.code\"\n    operator: \"one of\"\n    criteria: \"[85354-9]\"\nmappings:\n  - name: systolic\n    with:\n      fhir: \"$resource.component.value\"\n      openehr: \"$archetype/data[at0001]/events[at0006]/data[at0003]/items[at0004]\"\n    type: QUANTITY\n    fhirCondition:\n      targetRoot: \"$resource.component\"\n      targetAttribute: \"code.coding.code\"\n      operator: \"one of\"\n      criteria: \"[8480-6]\"",
-      context: "grammar: FHIRConnect/v1.0.0\ntype: context\nmetadata:\n  name: vital_signs_context\n  version: 0.0.1\nspec:\n  system: FHIR\n  version: R4\ncontext:\n  profile:\n    url: <redacted URL>    version: 4.0.1\n  template:\n    id: vital_signs\n    sem_ver: 1.0.0\n  archetypes:\n    - openEHR-EHR-OBSERVATION.blood_pressure.v2\n  extensions: []\n  start: openEHR-EHR-COMPOSITION.encounter.v1"
+      model: "grammar: FHIRConnect/v1.0.0\ntype: model\nmetadata:\n  name: blood_pressure\n  version: 0.0.1\nspec:\n  system: FHIR\n  version: R4\n  openEhrConfig:\n    archetype: openEHR-EHR-OBSERVATION.blood_pressure.v2\n  fhirConfig:\n    structureDefinition: http://hl7.org/fhir/StructureDefinition/Observation\n  fhirCondition:\n    targetRoot: \"$resource\"\n    targetAttribute: \"code.coding.code\"\n    operator: \"one of\"\n    criteria: \"[85354-9]\"\nmappings:\n  - name: systolic\n    with:\n      fhir: \"$resource.component.value\"\n      openehr: \"$archetype/data[at0001]/events[at0006]/data[at0003]/items[at0004]\"\n    type: QUANTITY\n    fhirCondition:\n      targetRoot: \"$resource.component\"\n      targetAttribute: \"code.coding.code\"\n      operator: \"one of\"\n      criteria: \"[8480-6]\"",
+      context: "grammar: FHIRConnect/v1.0.0\ntype: context\nmetadata:\n  name: vital_signs_context\n  version: 0.0.1\nspec:\n  system: FHIR\n  version: R4\ncontext:\n  profile:\n    url: http://hl7.eu/fhir/laboratory/StructureDefinition/DiagnosticReport-eu-lab\n    version: 4.0.1\n  template:\n    id: vital_signs\n    sem_ver: 1.0.0\n  archetypes:\n    - openEHR-EHR-OBSERVATION.blood_pressure.v2\n  extensions: []\n  start: openEHR-EHR-COMPOSITION.encounter.v1"
     };
 
     /* ================== TREE BUILDING ================== */
